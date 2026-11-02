@@ -1,0 +1,21 @@
+
+backend/data/
+
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Angular
+node_modules/
+dist/
+
+# Local database / logs
+*.log

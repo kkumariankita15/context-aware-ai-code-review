@@ -1,0 +1,121 @@
+# import sqlite3
+# from pathlib import Path
+# from .config import settings
+
+# def connect():
+#     Path(settings.database_path).parent.mkdir(parents=True, exist_ok=True)
+#     db = sqlite3.connect(settings.database_path)
+#     db.row_factory = sqlite3.Row
+#     return db
+
+# def init_db():
+#     with connect() as db:
+#         db.execute('''CREATE TABLE IF NOT EXISTS reviews (
+#             id INTEGER PRIMARY KEY AUTOINCREMENT, repository TEXT, pull_request INTEGER,
+#             title TEXT, status TEXT, score INTEGER, findings TEXT, summary TEXT,
+#             created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
+#         db.execute('''CREATE TABLE IF NOT EXISTS knowledge (
+#             id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT, category TEXT,
+#             content TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
+#         db.commit()
+
+# def save_review(repository, pr, title, score, findings, summary):
+#     import json
+#     with connect() as db:
+#         cur = db.execute(
+#             "INSERT INTO reviews(repository,pull_request,title,status,score,findings,summary) VALUES(?,?,?,?,?,?,?)",
+#             (repository, pr, title, "completed", score, json.dumps(findings), summary))
+#         db.commit()
+#         return cur.lastrowid
+
+
+
+import json
+import psycopg
+from psycopg.rows import dict_row
+
+from .config import settings
+
+
+def connect():
+    """
+    Create and return a PostgreSQL connection.
+
+    dict_row allows us to access columns using:
+    row["id"], row["repository"], etc.
+    """
+    return psycopg.connect(
+        settings.database_url,
+        row_factory=dict_row
+    )
+
+
+def init_db():
+    """
+    Create the required database tables if they do not exist.
+    """
+
+    with connect() as db:
+
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS reviews (
+                id BIGSERIAL PRIMARY KEY,
+                repository TEXT,
+                pull_request INTEGER,
+                title TEXT,
+                status TEXT,
+                score INTEGER,
+                findings TEXT,
+                summary TEXT,
+                created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS knowledge (
+                id BIGSERIAL PRIMARY KEY,
+                filename TEXT,
+                category TEXT,
+                content TEXT,
+                created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+
+def save_review(
+    repository,
+    pr,
+    title,
+    score,
+    findings,
+    summary
+):
+    """
+    Save a completed code review and return its generated ID.
+    """
+
+    with connect() as db:
+
+        row = db.execute("""
+            INSERT INTO reviews (
+                repository,
+                pull_request,
+                title,
+                status,
+                score,
+                findings,
+                summary
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """, (
+            repository,
+            pr,
+            title,
+            "completed",
+            score,
+            json.dumps(findings),
+            summary
+        )).fetchone()
+
+        return row["id"]

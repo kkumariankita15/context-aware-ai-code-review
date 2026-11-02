@@ -1,0 +1,81 @@
+# services:
+#   backend:
+#     build: ./backend
+#     ports: ["8000:8000"]
+#     env_file: ./backend/.env
+#     volumes:
+#       - ./backend/data:/app/data
+#       - ./backend/knowledge:/app/knowledge
+#   frontend:
+#     image: node:22-alpine
+#     working_dir: /app
+#     volumes: ["./frontend:/app"]
+#     command: sh -c "npm install && npm start"
+#     ports: ["4200:4200"]
+#     depends_on: [backend]
+
+
+services:
+
+  db:
+    image: postgres:17-alpine
+    container_name: code-review-postgres
+
+    environment:
+      POSTGRES_DB: code_review_db
+      POSTGRES_USER: code_review
+      POSTGRES_PASSWORD: local_dev_password
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U code_review -d code_review_db
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: code-review-backend
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - ./backend/.env
+
+    environment:
+      DATABASE_URL: postgresql://code_review:local_dev_password@db:5432/code_review_db
+
+    volumes:
+      - ./backend/knowledge:/app/knowledge
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: node:22-alpine
+    container_name: code-review-frontend
+
+    working_dir: /app
+
+    volumes:
+      - ./frontend:/app
+
+    command: sh -c "npm install && npm start"
+
+    ports:
+      - "4200:4200"
+
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
