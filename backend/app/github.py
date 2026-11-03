@@ -10,7 +10,16 @@ async def fetch_pull_request_diff(owner: str, repo: str, number: int):
     async with httpx.AsyncClient(timeout=30) as client:
         response = await client.get(url, headers=headers)
         response.raise_for_status()
-        return response.text
+        diff = response.text
+        print(
+            f"\n--- GitHub PR diff: {owner}/{repo}#{number} ---\n"
+            f"{diff if diff.strip() else '[empty diff]'}\n"
+            "--- End GitHub PR diff ---",
+            flush=True
+        )
+        if not diff.strip():
+            raise ValueError("GitHub reports that this pull request has no changed files to review.")
+        return diff
 
 async def post_pr_comment(owner: str, repo: str, number: int, body: str):
     if not settings.github_token:

@@ -33,7 +33,7 @@ import { ReviewService, Review, Finding } from './review.service';
         <div class="actions"><button class="primary" [disabled]="loading || !diff.trim()" (click)="runReview()">{{loading ? 'Analyzing…' : '✳ Analyze changes'}}</button><span class="muted">{{error}}</span></div>
         <div class="divider"></div>
         <h3>Or analyze a GitHub pull request</h3>
-        <div class="grid-github"><input [(ngModel)]="githubRepo" placeholder="owner/repository"><input type="number" [(ngModel)]="prNumber" placeholder="PR number"><label class="check"><input type="checkbox" [(ngModel)]="postComment"> Post summary comment</label><button class="secondary" [disabled]="loading || !githubRepo || !prNumber" (click)="runGithub()">Analyze GitHub PR →</button></div>
+        <div class="grid-github"><input [(ngModel)]="githubRepo" placeholder="GitHub PR URL or owner/repository"><input type="number" [(ngModel)]="prNumber" placeholder="PR number"><label class="check"><input type="checkbox" [(ngModel)]="postComment"> Post summary comment</label><button class="secondary" [disabled]="loading || !githubRepo" (click)="runGithub()">Analyze GitHub PR →</button></div>
       </section>
       <section *ngIf="tab==='knowledge'" class="panel">
         <div class="panel-head"><div><h2>Project knowledge base</h2><p>Give agents architecture, coding and design-system context.</p></div><span class="tag">{{knowledge.length}} SOURCES</span></div>
@@ -78,27 +78,59 @@ index 111..222 100644
   category = 'architecture'; selectedFile: File | null = null;
   githubRepo = ''; prNumber: number | null = null; postComment = false;
   get findingCount() { return this.reviews.reduce((n, r) => n + r.findings.length, 0); }
-  get averageScore() { return this.reviews.length ? Math.round(this.reviews.reduce((n,r)=>n+r.score,0)/this.reviews.length) : 0; }
+  get averageScore() { return this.reviews.length ? Math.round(this.reviews.reduce((n, r) => n + r.score, 0) / this.reviews.length) : 0; }
   ngOnInit() { this.load(); this.loadKnowledge(); }
-  load() { this.api.reviews().subscribe({next: r => {this.reviews=r; this.apiStatus='connected'; if (!this.latestReview && r.length) this.latestReview=r[0];}, error:()=>this.apiStatus='offline'}); }
-  loadKnowledge() { this.api.knowledge().subscribe({next:r=>this.knowledge=r, error:()=>{} }); }
+  load() { this.api.reviews().subscribe({ next: r => { this.reviews = r; this.apiStatus = 'connected'; if (!this.latestReview && r.length) this.latestReview = r[0]; }, error: () => this.apiStatus = 'offline' }); }
+  loadKnowledge() { this.api.knowledge().subscribe({ next: r => this.knowledge = r, error: () => { } }); }
   runReview() {
-    this.loading=true; this.error='';
-    this.api.analyze({repository:this.repository,title:this.title,diff:this.diff}).subscribe({
-      next:r=>{this.latestReview=r; this.loading=false; this.load();},
-      error:e=>{this.error=e.error?.detail || 'Could not reach the API. Is the backend running?'; this.loading=false;}
+    this.loading = true; this.error = '';
+    this.api.analyze({ repository: this.repository, title: this.title, diff: this.diff }).subscribe({
+      next: r => { this.latestReview = r; this.loading = false; this.load(); },
+      error: e => { this.error = e.error?.detail || 'Could not reach the API. Is the backend running?'; this.loading = false; }
     });
   }
   runGithub() {
-    const [owner, repo] = this.githubRepo.split('/');
-    if (!owner || !repo || !this.prNumber) return;
-    this.loading=true; this.error='';
-    this.api.analyzePr(owner,repo,this.prNumber,this.postComment).subscribe({
-      next:r=>{this.latestReview=r;this.loading=false;this.load();},
-      error:e=>{this.error=e.error?.detail || 'GitHub analysis failed';this.loading=false;}
+    const prInput = this.githubRepo.trim();
+    let owner = '';
+    let repo = '';
+    let number = this.prNumber;
+
+    if (/^https?:\/\//i.test(prInput) || /^www\.github\.com\//i.test(prInput)) {
+      try {
+        const prUrl = new URL(prInput.startsWith('http') ? prInput : `https://${prInput}`);
+        const pathParts = prUrl.pathname.split('/').filter(Boolean);
+        if (!['github.com', 'www.github.com'].includes(prUrl.hostname) || pathParts[2] !== 'pull') {
+          this.error = 'Enter a GitHub pull request URL.';
+          return;
+        }
+        owner = pathParts[0];
+        repo = pathParts[1];
+        number = Number(pathParts[3]);
+      } catch {
+        this.error = 'Enter a valid GitHub pull request URL.';
+        return;
+      }
+    } else {
+      const repositoryParts = prInput.split('/');
+      if (repositoryParts.length !== 2) {
+        this.error = 'Enter a GitHub PR URL or owner/repository.';
+        return;
+      }
+      [owner, repo] = repositoryParts;
+    }
+
+    if (!owner || !repo || !Number.isInteger(number) || !number || number < 1) {
+      this.error = 'Enter a valid repository and pull request number.';
+      return;
+    }
+
+    this.loading = true; this.error = '';
+    this.api.analyzePr(owner, repo, number, this.postComment).subscribe({
+      next: r => { this.latestReview = r; this.loading = false; this.load(); },
+      error: e => { this.error = e.error?.detail || 'GitHub analysis failed'; this.loading = false; }
     });
   }
-  onFile(event: Event) { this.selectedFile=(event.target as HTMLInputElement).files?.[0] || null; }
-  upload() { if (!this.selectedFile) return; this.api.upload(this.selectedFile,this.category).subscribe({next:()=>{this.selectedFile=null;this.loadKnowledge();},error:e=>this.error=e.error?.detail || 'Upload failed'}); }
-  select(r: Review) { this.latestReview=r; this.tab='overview'; window.scrollTo({top:0,behavior:'smooth'}); }
+  onFile(event: Event) { this.selectedFile = (event.target as HTMLInputElement).files?.[0] || null; }
+  upload() { if (!this.selectedFile) return; this.api.upload(this.selectedFile, this.category).subscribe({ next: () => { this.selectedFile = null; this.loadKnowledge(); }, error: e => this.error = e.error?.detail || 'Upload failed' }); }
+  select(r: Review) { this.latestReview = r; this.tab = 'overview'; window.scrollTo({ top: 0, behavior: 'smooth' }); }
 }
