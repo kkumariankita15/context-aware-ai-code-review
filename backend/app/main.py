@@ -107,6 +107,8 @@ import json
 import hashlib
 import hmac
 
+import httpx
+
 from fastapi import (
     FastAPI,
     HTTPException,
@@ -120,10 +122,40 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .database import init_db, connect, save_review
-from .schemas import AnalyzeRequest
+from .schemas import AnalyzeRequest, PostReviewCommentRequest
 from .agents import run_review
 from .knowledge import ingest_text, ingest_directory
 from .github import fetch_pull_request_diff, post_pr_comment
+
+
+def format_review_comment(score, summary, findings, additional_comment=None):
+    lines = [
+        f"## AI Code Review — score {score}/100",
+        summary,
+        ""
+    ]
+
+    if additional_comment and additional_comment.strip():
+        lines.extend([
+            "### Additional comment",
+            additional_comment.strip(),
+            ""
+        ])
+
+    lines.append("### Findings")
+
+    if not findings:
+        lines.append("No actionable findings were reported.")
+
+    for finding in findings[:25]:
+        location = f"{finding['file']}:{finding['line'] or '?'}"
+        lines.extend([
+            f"- **{finding['severity'].upper()} · {finding['title']}** (`{location}`)",
+            f"  - {finding['explanation']}",
+            f"  - Recommendation: {finding['recommendation']}"
+        ])
+
+    return "\n".join(lines)
 
 
 app = FastAPI(
@@ -347,28 +379,13 @@ async def analyze_github_pr(
 
     if post_comment:
 
-        lines = [
-            f"## AI Code Review — score {score}/100",
-            summary,
-            ""
-        ]
-
-        for finding in findings[:25]:
-
-            lines.append(
-                f"- **{finding['severity'].upper()} · "
-                f"{finding['title']}** "
-                f"(`{finding['file']}:{finding['line'] or '?'}`) "
-                f"— {finding['recommendation']}"
-            )
-
         try:
 
             await post_pr_comment(
                 owner,
                 repo,
                 number,
-                "\n".join(lines)
+                format_review_comment(score, summary, findings)
             )
 
         except Exception as error:
@@ -389,6 +406,71 @@ async def analyze_github_pr(
         "summary": summary,
         "diff": diff,
         "context_used": context
+    }
+
+
+@app.post("/api/reviews/{review_id}/post-comment")
+async def post_review_comment(
+    review_id: int,
+    request: PostReviewCommentRequest
+):
+    with connect() as db:
+        row = db.execute("""
+            SELECT repository, pull_request, score, findings, summary
+            FROM reviews
+            WHERE id = %s
+        """, (review_id,)).fetchone()
+
+    if not row:
+        raise HTTPException(
+            status_code=404,
+            detail="Review not found"
+        )
+
+    if row["pull_request"] is None:
+        raise HTTPException(
+            status_code=400,
+            detail="This review is not associated with a GitHub pull request."
+        )
+
+    repository_parts = (row["repository"] or "").split("/", 1)
+    if len(repository_parts) != 2 or not all(repository_parts):
+        raise HTTPException(
+            status_code=400,
+            detail="The saved review does not contain a valid GitHub repository."
+        )
+
+    if not settings.github_token:
+        raise HTTPException(
+            status_code=503,
+            detail="Set GITHUB_TOKEN to post a comment on a GitHub pull request."
+        )
+
+    owner, repo = repository_parts
+    body = format_review_comment(
+        row["score"],
+        row["summary"],
+        json.loads(row["findings"]),
+        request.additional_comment
+    )
+
+    try:
+        comment = await post_pr_comment(
+            owner,
+            repo,
+            row["pull_request"],
+            body
+        )
+    except httpx.HTTPError as error:
+        raise HTTPException(
+            status_code=502,
+            detail="GitHub could not accept the review comment."
+        ) from error
+
+    return {
+        "status": "posted",
+        "comment_url": comment.get("html_url"),
+        "comment_id": comment.get("id")
     }
 
 

@@ -51,6 +51,73 @@
   border-radius: 7px;
 }
 
+.github-comment {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 14px;
+  border: 1px solid #e8ebf2;
+  border-radius: 8px;
+  background: #fbfcff;
+}
+
+.github-comment label {
+  color: #4d5e80;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.github-comment textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  border: 1px solid #dfe4ed;
+  border-radius: 6px;
+  padding: 9px;
+  font: 12px/1.5 'DM Sans', sans-serif;
+}
+
+.comment-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.post-comment {
+  border: 0;
+  border-radius: 6px;
+  padding: 9px 12px;
+  background: #5147ca;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.post-comment:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.comment-success,
+.comment-error {
+  font-size: 11px;
+}
+
+.comment-success {
+  color: #179a72;
+}
+
+.comment-success a {
+  margin-left: 4px;
+  color: #5147ca;
+}
+
+.comment-error {
+  color: #c74440;
+}
+
 .diff-view {
   margin: 0 0 16px;
   border: 1px solid #e8ebf2;

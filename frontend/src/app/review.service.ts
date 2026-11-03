@@ -26,4 +26,10 @@ export class ReviewService {
   analyzePr(owner: string, repo: string, number: number, postComment: boolean) {
     return this.http.post<Review>(`${this.base}/github/pull-requests/${owner}/${repo}/${number}/analyze?post_comment=${postComment}`, {});
   }
+  postReviewComment(reviewId: number, additionalComment?: string) {
+    return this.http.post<{status: string; comment_url?: string; comment_id?: number}>(
+      `${this.base}/reviews/${reviewId}/post-comment`,
+      { additional_comment: additionalComment || null }
+    );
+  }
 }

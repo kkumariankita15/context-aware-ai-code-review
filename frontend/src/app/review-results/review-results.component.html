@@ -4,6 +4,26 @@
     <div class="score" [class.warn]="review.score < 70">{{review.score}}<small>/100</small></div>
   </div>
   <p class="summary">{{review.summary}}</p>
+  <div *ngIf="review.pull_request != null" class="github-comment">
+    <label for="additional-comment">Optional comment to include on GitHub</label>
+    <textarea
+      id="additional-comment"
+      [(ngModel)]="additionalComment"
+      maxlength="2000"
+      rows="3"
+      placeholder="Add context for the PR author (optional)">
+    </textarea>
+    <div class="comment-actions">
+      <button type="button" class="post-comment" [disabled]="postingComment" (click)="postFindingsToPr()">
+        {{postingComment ? 'Posting…' : 'Post findings to GitHub PR'}}
+      </button>
+      <span *ngIf="postedCommentUrl" class="comment-success" role="status">
+        Findings posted.
+        <a [href]="postedCommentUrl" target="_blank" rel="noopener noreferrer">View comment</a>
+      </span>
+      <span *ngIf="commentError" class="comment-error" role="alert">{{commentError}}</span>
+    </div>
+  </div>
   <details *ngIf="review.diff" class="diff-view">
     <summary>View GitHub pull request diff</summary>
     <pre>{{review.diff}}</pre>
