@@ -10,4 +10,5 @@ export class ReviewMetricsComponent {
   @Input() reviewCount = 0;
   @Input() averageScore = 0;
   @Input() findingCount = 0;
+  @Input() highPriorityFindingCount = 0;
 }

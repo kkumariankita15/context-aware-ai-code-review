@@ -3,16 +3,25 @@
     <div><h2>Recent reviews</h2><p>Review activity in this workspace</p></div>
     <button class="text-button" (click)="refresh.emit()">Refresh ↻</button>
   </div>
-  <button
-    type="button"
-    class="history-row"
-    *ngFor="let review of reviews"
-    [class.selected]="review.id === selectedReviewId"
-    [attr.aria-pressed]="review.id === selectedReviewId"
-    (click)="reviewSelected.emit(review)">
-    <div><b>{{review.title}}</b><small>{{review.repository}} · {{review.created_at}}</small></div>
-    <span>{{review.findings.length}} findings</span>
-    <strong>{{review.score}}/100</strong>
-  </button>
+  <div class="history-entry" *ngFor="let review of reviews">
+    <button
+      type="button"
+      class="history-row"
+      [class.selected]="review.id === expandedReviewId"
+      [attr.aria-expanded]="review.id === expandedReviewId"
+      [attr.aria-controls]="'review-details-' + review.id"
+      (click)="toggleReview(review)">
+      <div class="review-title"><b>{{review.title}}</b><small>{{review.repository}} · {{review.created_at}}</small></div>
+      <span>{{review.findings.length}} findings</span>
+      <strong>{{review.score}}/100</strong>
+      <span class="expand-icon" [class.expanded]="review.id === expandedReviewId" aria-hidden="true">⌄</span>
+    </button>
+    <div
+      *ngIf="review.id === expandedReviewId"
+      class="expanded-review"
+      [id]="'review-details-' + review.id">
+      <app-review-results [review]="review"></app-review-results>
+    </div>
+  </div>
   <div *ngIf="!reviews.length" class="empty">No reviews yet. Start your first review above.</div>
 </section>

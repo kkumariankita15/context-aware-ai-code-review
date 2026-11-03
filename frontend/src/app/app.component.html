@@ -1,44 +1,249 @@
 <div class="shell">
-  <app-sidebar [apiStatus]="apiStatus" [activeTab]="tab" (tabChange)="tab = $event"></app-sidebar>
+  <ng-container *ngIf="requestInProgress$ | async">
+    <span class="progress-track"><span></span></span>
+    <div class="request-progress" role="status" aria-live="polite">
+      <span class="request-spinner" aria-hidden="true"></span>
+      <span>Updating workspace…</span>
+    </div>
+  </ng-container>
+  <app-sidebar
+    [apiStatus]="apiStatus"
+    [activeTab]="tab"
+    [reviewCount]="reviews.length"
+    (tabChange)="setTab($event)">
+  </app-sidebar>
 
   <main class="main">
-    <header>
+    <header class="topbar">
       <div>
-        <div class="eyebrow">ENGINEERING INTELLIGENCE / OVERVIEW</div>
-        <h1>Code review command center</h1>
-        <p>Project-aware feedback, consistent standards, faster pull requests.</p>
+        <div class="eyebrow">WORKSPACE <span>/</span> {{pageTitle}}</div>
+        <h1>{{pageTitle}}</h1>
+        <p>{{pageDescription}}</p>
       </div>
-      <button class="primary" (click)="tab = 'review'">＋ Start a review</button>
+      <div class="topbar-actions">
+        <div class="api-status" [class.offline]="apiStatus === 'offline'">
+          <span class="status-dot"></span>
+          <span>{{apiStatus === 'connected' ? 'All systems operational' : apiStatus === 'offline' ? 'API unavailable' : 'Connecting to API'}}</span>
+        </div>
+        <button class="primary topbar-cta" (click)="setTab('review')">
+          <span aria-hidden="true">＋</span> New review
+        </button>
+      </div>
     </header>
 
-    <app-review-metrics
-      [reviewCount]="reviews.length"
-      [averageScore]="averageScore"
-      [findingCount]="findingCount">
-    </app-review-metrics>
+    <section class="page-content" *ngIf="tab === 'overview'">
+      <app-review-metrics
+        [reviewCount]="reviews.length"
+        [averageScore]="averageScore"
+        [findingCount]="findingCount"
+        [highPriorityFindingCount]="highPriorityFindingCount">
+      </app-review-metrics>
 
-    <app-review-form
-      *ngIf="tab === 'review'"
-      [loading]="loading"
-      [error]="error"
-      (diffReview)="runReview($event)"
-      (githubReview)="runGithub($event)">
-    </app-review-form>
+      <section class="welcome-card" *ngIf="!overviewReviews.length">
+        <div class="welcome-mark" aria-hidden="true">✳</div>
+        <div class="eyebrow">YOUR AI REVIEW WORKSPACE</div>
+        <h2>Ship thoughtful code, <span>with confidence.</span></h2>
+        <p>Connect a pull request or paste a diff. Your specialist agents will review it against your project context.</p>
+        <button class="primary" (click)="setTab('review')">Start your first review <span aria-hidden="true">→</span></button>
+      </section>
 
-    <app-knowledge-base *ngIf="tab === 'knowledge'"></app-knowledge-base>
+      <section class="overview-grid" *ngIf="overviewReviews.length">
+        <article class="overview-card latest-summary">
+          <div class="overview-card-head">
+            <div>
+              <span class="section-kicker">ALL REVIEWS</span>
+              <h2>Workspace review health</h2>
+            </div>
+            <button class="text-button" (click)="setTab('history')">View reviews <span aria-hidden="true">→</span></button>
+          </div>
 
-    <app-review-results
-      *ngIf="latestReview && (tab === 'overview' || tab === 'review' || tab === 'knowledge')"
-      [review]="latestReview">
-    </app-review-results>
+          <div class="review-snapshot">
+            <div class="score-summary" [class.warn]="averageScore < 70">
+              <strong>{{averageScore}}</strong>
+              <span>AVERAGE<br>SCORE</span>
+            </div>
+            <div class="snapshot-copy">
+              <span class="repository-label">WORKSPACE AVERAGE</span>
+              <h3>{{overviewReviews.length}} reviews analyzed</h3>
+              <p>Quality score and finding breakdown across all available reviews.</p>
+            </div>
+          </div>
 
-    <app-review-history
-      [reviews]="reviews"
-      [selectedReviewId]="latestReview?.id ?? null"
-      (refresh)="load()"
-      (reviewSelected)="selectReview($event)">
-    </app-review-history>
+          <div class="finding-breakdown" aria-label="All review findings by severity">
+            <div class="finding-stat critical-stat"><span class="severity-dot"></span><strong>{{severityCount('critical')}}</strong><small>Critical</small></div>
+            <div class="finding-stat high-stat"><span class="severity-dot"></span><strong>{{severityCount('high')}}</strong><small>High</small></div>
+            <div class="finding-stat medium-stat"><span class="severity-dot"></span><strong>{{severityCount('medium')}}</strong><small>Medium</small></div>
+            <div class="finding-stat low-stat"><span class="severity-dot"></span><strong>{{severityCount('low')}}</strong><small>Low</small></div>
+          </div>
+        </article>
 
-    <footer>ReviewPilot · Demo build · Findings are advisory and require human verification.</footer>
+        <article class="overview-card activity-card">
+          <div class="overview-card-head">
+            <div>
+              <span class="section-kicker">WORKSPACE</span>
+              <h2>Recent activity</h2>
+            </div>
+            <button class="text-button" (click)="setTab('history')">View all <span aria-hidden="true">→</span></button>
+          </div>
+
+          <button
+            type="button"
+            class="activity-row"
+            *ngFor="let review of recentReviews"
+            (click)="selectReview(review)">
+            <span class="activity-icon" aria-hidden="true">⌘</span>
+            <span class="activity-copy">
+              <strong>{{review.title}}</strong>
+              <small>{{review.repository}} · {{review.created_at | date:'MMM d'}}</small>
+            </span>
+            <span class="activity-findings">{{review.findings.length}} <small>findings</small></span>
+            <span class="activity-score">{{review.score}}</span>
+          </button>
+        </article>
+      </section>
+
+      <section class="overview-guidance" aria-label="How to use ReviewPilot">
+        <article class="overview-card getting-started-card">
+          <div class="overview-card-head">
+            <div>
+              <span class="section-kicker">A SIMPLE WORKFLOW</span>
+              <h2>How to use ReviewPilot</h2>
+            </div>
+            <span class="guide-icon" aria-hidden="true">↗</span>
+          </div>
+
+          <ol class="workflow-steps">
+            <li>
+              <span class="step-number">01</span>
+              <span class="step-copy"><strong>Add project context <small>OPTIONAL</small></strong><span>Upload architecture notes or coding standards in Knowledge base for more relevant feedback.</span></span>
+              <button type="button" class="step-link" aria-label="Open knowledge base" (click)="setTab('knowledge')">→</button>
+            </li>
+            <li>
+              <span class="step-number">02</span>
+              <span class="step-copy"><strong>Submit a change</strong><span>Analyze a GitHub pull request or paste a unified diff to start your review.</span></span>
+              <button type="button" class="step-link" aria-label="Start a code review" (click)="setTab('review')">→</button>
+            </li>
+            <li>
+              <span class="step-number">03</span>
+              <span class="step-copy"><strong>Review findings & act</strong><span>Check severity, file, and recommendations; verify findings before sharing or posting.</span></span>
+              <button type="button" class="step-link" aria-label="View review history" (click)="setTab(overviewReviews.length ? 'history' : 'review')">→</button>
+            </li>
+          </ol>
+        </article>
+
+        <article class="overview-card agents-card">
+          <div class="overview-card-head">
+            <div>
+              <span class="section-kicker">SPECIALIST REVIEW</span>
+              <h2>Meet your review agents</h2>
+            </div>
+            <span class="agent-count">{{reviewAgents.length}} agents</span>
+          </div>
+
+          <div class="agent-grid">
+            <article class="agent-tile" *ngFor="let agent of reviewAgents">
+              <span class="agent-icon" [ngClass]="agent.tone" aria-hidden="true">{{agent.icon}}</span>
+              <div class="agent-copy">
+                <h3>{{agent.name}}</h3>
+                <span>{{agent.focus}}</span>
+                <p>{{agent.description}}</p>
+              </div>
+            </article>
+          </div>
+          <p class="optional-agent-note"><span aria-hidden="true">✦</span> Optional AI context review can add project-aware feedback when configured.</p>
+        </article>
+      </section>
+    </section>
+
+    <section class="page-content" *ngIf="tab === 'review'">
+      <app-review-form
+        [loading]="loading"
+        [error]="error"
+        (diffReview)="runReview($event)"
+        (githubReview)="runGithub($event)">
+      </app-review-form>
+
+      <div #reviewResults class="review-results-anchor" *ngIf="displayedReview">
+        <app-review-results [review]="displayedReview"></app-review-results>
+      </div>
+    </section>
+
+    <section class="page-content" *ngIf="tab === 'history'">
+      <app-review-history
+        [reviews]="reviews"
+        (refresh)="load()">
+      </app-review-history>
+    </section>
+
+    <section class="page-content" *ngIf="tab === 'knowledge'">
+      <app-knowledge-base></app-knowledge-base>
+    </section>
+
+    <section class="page-content appearance-page" *ngIf="tab === 'appearance'">
+      <section class="panel appearance-panel">
+        <div class="panel-head">
+          <div>
+            <div class="section-kicker">MAKE IT YOURS</div>
+            <h2>Choose your workspace color</h2>
+            <p>Switch the accent across buttons, highlights and navigation. Your choice is saved on this device.</p>
+          </div>
+          <span class="appearance-icon" aria-hidden="true">◉</span>
+        </div>
+
+        <div class="theme-options" role="group" aria-label="Color theme presets">
+          <button
+            type="button"
+            class="theme-option"
+            *ngFor="let theme of themes"
+            [class.selected]="activeThemeId === theme.id"
+            [attr.aria-pressed]="activeThemeId === theme.id"
+            (click)="selectTheme(theme)">
+            <span class="theme-swatch" [style.background]="theme.primary"></span>
+            <span class="theme-copy"><strong>{{theme.name}}</strong><small>{{theme.description}}</small></span>
+            <span class="theme-check" aria-hidden="true">{{activeThemeId === theme.id ? '✓' : ''}}</span>
+          </button>
+        </div>
+
+        <div class="custom-color-row">
+          <div class="custom-copy">
+            <strong>Use a custom accent</strong>
+            <small>Enter any brand color to personalize your workspace.</small>
+          </div>
+          <label class="color-picker">
+            <span>{{customAccent}}</span>
+            <input #accentInput type="color" [value]="customAccent" aria-label="Choose a custom accent color" (input)="setCustomAccent(accentInput.value)">
+          </label>
+        </div>
+      </section>
+
+      <section class="panel preview-panel">
+        <div class="panel-head">
+          <div>
+            <div class="section-kicker">LIVE PREVIEW</div>
+            <h2>Your workspace, refreshed</h2>
+            <p>Changes apply instantly throughout the app.</p>
+          </div>
+          <span class="preview-badge">PREVIEW</span>
+        </div>
+        <div class="preview-window">
+          <div class="preview-sidebar">
+            <span class="preview-brand-mark">✳</span>
+            <span class="preview-nav active"><i></i> Overview</span>
+            <span class="preview-nav"><i></i> New review</span>
+            <span class="preview-nav"><i></i> History</span>
+          </div>
+          <div class="preview-content">
+            <span class="preview-caption">GOOD MORNING, TEAM</span>
+            <strong>Code review, at a glance.</strong>
+            <span class="preview-line"></span>
+            <span class="preview-line short"></span>
+            <span class="preview-cta">New review <i>→</i></span>
+          </div>
+        </div>
+        <p class="theme-current">Currently using <strong>{{activeThemeName}}</strong></p>
+      </section>
+    </section>
+
+    <footer>ReviewPilot <span>·</span> AI-assisted insights, with humans in control.</footer>
   </main>
 </div>
