@@ -1,0 +1,21 @@
+<section class="panel">
+  <div class="panel-head">
+    <div><h2>Latest review results</h2><p>{{review.repository}} · {{review.title}}</p></div>
+    <div class="score" [class.warn]="review.score < 70">{{review.score}}<small>/100</small></div>
+  </div>
+  <p class="summary">{{review.summary}}</p>
+  <details *ngIf="review.diff" class="diff-view">
+    <summary>View GitHub pull request diff</summary>
+    <pre>{{review.diff}}</pre>
+  </details>
+  <div class="finding" *ngFor="let finding of review.findings">
+    <span class="severity" [class]="finding.severity">{{finding.severity}}</span>
+    <div class="finding-body">
+      <b>{{finding.title}}</b>
+      <small>{{finding.file}}<span *ngIf="finding.line"> :{{finding.line}}</span> · {{finding.agent}}</small>
+      <p>{{finding.explanation}}</p>
+      <div class="recommend">↳ {{finding.recommendation}}</div>
+    </div>
+  </div>
+  <div *ngIf="!review.findings.length" class="empty">No findings from the configured checks. Great work.</div>
+</section>

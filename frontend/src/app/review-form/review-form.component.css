@@ -1,0 +1,156 @@
+.panel {
+  padding: 23px 25px;
+  margin-bottom: 20px;
+  background: white;
+  border: 1px solid #e8ebf2;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px #17233a08;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.panel-head h2 {
+  font: 700 16px Manrope, sans-serif;
+  margin: 0 0 5px;
+}
+
+.panel-head p {
+  color: #7c8799;
+  font-size: 13px;
+  margin: 0;
+}
+
+.tag {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #6359df;
+  background: #f0efff;
+  border-radius: 20px;
+  padding: 7px 10px;
+  font-weight: 700;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #667286;
+  margin-bottom: 14px;
+}
+
+textarea {
+  resize: vertical;
+  line-height: 1.5;
+  font-family: monospace;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.error {
+  font-size: 11px;
+  color: #c05c5c;
+}
+
+.divider {
+  height: 1px;
+  background: #edf0f4;
+  margin: 22px 0;
+}
+
+h3 {
+  font: 700 13px Manrope, sans-serif;
+  margin: 0 0 13px;
+}
+
+.grid-github {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.grid-github input {
+  margin: 0;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.check input {
+  width: auto;
+  margin: 0;
+}
+
+.primary,
+.secondary {
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 16px;
+  background: #655be7;
+  color: white;
+  font: 700 12px 'DM Sans', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 3px 8px #655be733;
+}
+
+.secondary {
+  background: #eef0ff;
+  color: #5147ca;
+  box-shadow: none;
+}
+
+.primary:disabled,
+.secondary:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1000px) {
+  .grid-github {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .grid-github .check {
+    grid-column: 1;
+  }
+
+  .grid-github button {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 700px) {
+  .grid2,
+  .grid-github {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-github .check,
+  .grid-github button {
+    grid-column: auto;
+  }
+
+  .panel {
+    padding: 18px 15px;
+  }
+}

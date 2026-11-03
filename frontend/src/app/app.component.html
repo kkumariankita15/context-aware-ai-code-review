@@ -1,0 +1,44 @@
+<div class="shell">
+  <app-sidebar [apiStatus]="apiStatus" [activeTab]="tab" (tabChange)="tab = $event"></app-sidebar>
+
+  <main class="main">
+    <header>
+      <div>
+        <div class="eyebrow">ENGINEERING INTELLIGENCE / OVERVIEW</div>
+        <h1>Code review command center</h1>
+        <p>Project-aware feedback, consistent standards, faster pull requests.</p>
+      </div>
+      <button class="primary" (click)="tab = 'review'">＋ Start a review</button>
+    </header>
+
+    <app-review-metrics
+      [reviewCount]="reviews.length"
+      [averageScore]="averageScore"
+      [findingCount]="findingCount">
+    </app-review-metrics>
+
+    <app-review-form
+      *ngIf="tab === 'review'"
+      [loading]="loading"
+      [error]="error"
+      (diffReview)="runReview($event)"
+      (githubReview)="runGithub($event)">
+    </app-review-form>
+
+    <app-knowledge-base *ngIf="tab === 'knowledge'"></app-knowledge-base>
+
+    <app-review-results
+      *ngIf="latestReview && (tab === 'overview' || tab === 'review' || tab === 'knowledge')"
+      [review]="latestReview">
+    </app-review-results>
+
+    <app-review-history
+      [reviews]="reviews"
+      [selectedReviewId]="latestReview?.id ?? null"
+      (refresh)="load()"
+      (reviewSelected)="selectReview($event)">
+    </app-review-history>
+
+    <footer>ReviewPilot · Demo build · Findings are advisory and require human verification.</footer>
+  </main>
+</div>
