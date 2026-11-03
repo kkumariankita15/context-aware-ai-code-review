@@ -8,7 +8,7 @@ export interface Finding {
 }
 export interface Review {
   id: number; repository: string; pull_request?: number; title: string; status: string;
-  score: number; findings: Finding[]; summary: string; created_at: string;
+  score: number; findings: Finding[]; summary: string; created_at: string; diff?: string;
 }
 @Injectable({ providedIn: 'root' })
 export class ReviewService {

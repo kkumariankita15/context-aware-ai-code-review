@@ -1,0 +1,14 @@
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-icon">✳</div>
+    <div><b>ReviewPilot</b><small>AI engineering quality</small></div>
+  </div>
+  <div class="nav-label">WORKSPACE</div>
+  <button class="nav" [class.active]="activeTab === 'overview'" (click)="tabChange.emit('overview')">▦ &nbsp; Overview</button>
+  <button class="nav" [class.active]="activeTab === 'review'" (click)="tabChange.emit('review')">⌘ &nbsp; New review</button>
+  <button class="nav" [class.active]="activeTab === 'knowledge'" (click)="tabChange.emit('knowledge')">◈ &nbsp; Knowledge base</button>
+  <div class="sidebar-bottom">
+    <span class="online"></span> API connection <b>{{apiStatus}}</b>
+    <small>Multi-agent review engine</small>
+  </div>
+</aside>

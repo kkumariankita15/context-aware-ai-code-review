@@ -387,6 +387,7 @@ async def analyze_github_pr(
         "score": score,
         "findings": findings,
         "summary": summary,
+        "diff": diff,
         "context_used": context
     }
 
@@ -464,4 +465,3 @@ async def github_webhook(request: Request):
         "score": score,
         "findings_count": len(findings)
     }
-
