@@ -1,0 +1,128 @@
+.panel {
+  padding: 23px 25px;
+  margin-bottom: 20px;
+  background: white;
+  border: 1px solid #e8ebf2;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px #17233a08;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.panel-head h2 {
+  font: 700 16px Manrope, sans-serif;
+  margin: 0 0 5px;
+}
+
+.panel-head p {
+  color: #7c8799;
+  font-size: 13px;
+  margin: 0;
+}
+
+.tag {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #6359df;
+  background: #f0efff;
+  border-radius: 20px;
+  padding: 7px 10px;
+  font-weight: 700;
+}
+
+.upload-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.upload-row input {
+  flex: 1;
+}
+
+.upload-row select {
+  width: 170px;
+}
+
+.upload-row button {
+  white-space: nowrap;
+}
+
+.primary {
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 16px;
+  background: #655be7;
+  color: white;
+  font: 700 12px 'DM Sans', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 3px 8px #655be733;
+}
+
+.primary:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.source {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid #f0f2f6;
+}
+
+.file-icon {
+  width: 34px;
+  height: 34px;
+  background: #f0efff;
+  color: #6359df;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+}
+
+.source b {
+  font-size: 12px;
+}
+
+.source small {
+  display: block;
+  color: #9aa3b1;
+  font-size: 10px;
+  margin-top: 4px;
+}
+
+.hint {
+  font-size: 11px;
+  color: #929cad;
+  background: #f8f9fc;
+  padding: 12px;
+  border-radius: 7px;
+  margin: 16px 0 0;
+}
+
+.error {
+  font-size: 11px;
+  color: #c05c5c;
+}
+
+@media (max-width: 700px) {
+  .panel {
+    padding: 18px 15px;
+  }
+
+  .upload-row {
+    flex-wrap: wrap;
+  }
+
+  .upload-row input {
+    min-width: 100%;
+  }
+}

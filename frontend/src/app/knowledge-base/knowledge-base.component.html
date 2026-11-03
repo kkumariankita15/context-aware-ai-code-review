@@ -1,0 +1,23 @@
+<section class="panel">
+  <div class="panel-head">
+    <div><h2>Project knowledge base</h2><p>Give agents architecture, coding and design-system context.</p></div>
+    <span class="tag">{{knowledge.length}} SOURCES</span>
+  </div>
+  <div class="upload-row">
+    <input type="file" #fileInput (change)="onFile($event)">
+    <select [(ngModel)]="category">
+      <option>architecture</option>
+      <option>coding-standards</option>
+      <option>design-system</option>
+      <option>eslint-sonar</option>
+      <option>previous-review</option>
+    </select>
+    <button class="primary" [disabled]="!selectedFile" (click)="upload()">Upload context</button>
+  </div>
+  <p *ngIf="error" class="error">{{error}}</p>
+  <div class="source" *ngFor="let item of knowledge">
+    <div class="file-icon">▤</div>
+    <div><b>{{item.filename}}</b><small>{{item.category}} · {{item.bytes}} bytes</small></div>
+  </div>
+  <p class="hint">Tip: place documents in backend/knowledge before startup, or upload text-based files here. The demo uses keyword retrieval; see README for a vector-search upgrade path.</p>
+</section>
