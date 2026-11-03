@@ -461,10 +461,29 @@ async def post_review_comment(
             row["pull_request"],
             body
         )
+    except httpx.HTTPStatusError as error:
+        try:
+            response_body = error.response.json()
+        except ValueError:
+            response_body = {}
+
+        github_message = (
+            response_body.get("message")
+            if isinstance(response_body, dict)
+            else None
+        )
+        detail = (
+            f"GitHub API returned {error.response.status_code}: "
+            f"{github_message or error.response.reason_phrase}"
+        )
+        raise HTTPException(
+            status_code=502,
+            detail=detail
+        ) from error
     except httpx.HTTPError as error:
         raise HTTPException(
             status_code=502,
-            detail="GitHub could not accept the review comment."
+            detail="Could not connect to GitHub to post the review comment."
         ) from error
 
     return {

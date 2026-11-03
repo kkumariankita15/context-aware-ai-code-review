@@ -79,7 +79,7 @@ h3 {
 
 .grid-github {
   display: grid;
-  grid-template-columns: 2fr 1fr auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 10px;
   align-items: center;
 }
@@ -131,7 +131,7 @@ h3 {
   }
 
   .grid-github .check {
-    grid-column: 1;
+    grid-column: 1 / -1;
   }
 
   .grid-github button {
