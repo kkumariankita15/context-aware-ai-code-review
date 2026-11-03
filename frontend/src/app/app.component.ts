@@ -62,7 +62,7 @@ import { ReviewService, Review, Finding } from './review.service';
 export class AppComponent implements OnInit {
   private api = inject(ReviewService);
   tab = 'overview'; reviews: Review[] = []; latestReview: Review | null = null;
-  repository = 'demo/repository'; title = 'Local code review'; password:"123@15";
+  repository = 'demo/repository'; title = 'Local code review';
   diff = `diff --git a/src/auth.ts b/src/auth.ts
 index 111..222 100644
 --- a/src/auth.ts
