@@ -17,7 +17,7 @@
 
 .panel-head h2 {
   margin: 0 0 5px;
-  font: 700 19.0px Manrope, sans-serif;
+  font: 700 18.0px Manrope, sans-serif;
 }
 
 .panel-head p {
@@ -32,7 +32,7 @@
   border-radius: 10px;
   background: #e8f6f0;
   color: var(--color-success);
-  font: 800 27.0px Manrope, sans-serif;
+  font: 800 25.0px Manrope, sans-serif;
 }
 
 .score.warn {
@@ -42,7 +42,7 @@
 
 .score small {
   margin-left: 3px;
-  font: 500 11.0px 'DM Sans', sans-serif;
+  font: 500 9.0px 'DM Sans', sans-serif;
 }
 
 .summary {

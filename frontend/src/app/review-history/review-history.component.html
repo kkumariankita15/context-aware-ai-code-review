@@ -1,7 +1,20 @@
 <section class="panel">
   <div class="panel-head">
     <div><h2>Recent reviews</h2><p>Review activity in this workspace</p></div>
-    <button class="text-button" (click)="refresh.emit()">Refresh ↻</button>
+    <button class="text-button" [disabled]="loading" (click)="load()">
+      {{loading ? 'Refreshing…' : 'Refresh ↻'}}
+    </button>
+  </div>
+  <div *ngIf="loading && !reviews.length" class="history-loading" role="status" aria-label="Loading reviews">
+    <div class="history-skeleton-row" *ngFor="let row of [1, 2, 3]" aria-hidden="true">
+      <div class="history-skeleton-copy">
+        <span class="skeleton history-skeleton-title"></span>
+        <span class="skeleton history-skeleton-subtitle"></span>
+      </div>
+      <span class="skeleton history-skeleton-count"></span>
+      <span class="skeleton history-skeleton-score"></span>
+    </div>
+    <span class="visually-hidden">Loading reviews…</span>
   </div>
   <div class="history-entry" *ngFor="let review of reviews">
     <button
@@ -23,5 +36,14 @@
       <app-review-results [review]="review"></app-review-results>
     </div>
   </div>
-  <div *ngIf="!reviews.length" class="empty">No reviews yet. Start your first review above.</div>
+  <div *ngIf="error && !reviews.length" class="empty empty-error" role="alert">
+    <strong>Reviews couldn’t be loaded</strong>
+    <span>{{error}}</span>
+    <button type="button" class="text-button" (click)="load()">Try again</button>
+  </div>
+  <div *ngIf="!loading && !error && !reviews.length" class="empty">
+    <strong>No reviews found yet</strong>
+    <span>Start a code review to see your findings and scores here.</span>
+    <a class="text-button" routerLink="/review">Start a review <span aria-hidden="true">→</span></a>
+  </div>
 </section>

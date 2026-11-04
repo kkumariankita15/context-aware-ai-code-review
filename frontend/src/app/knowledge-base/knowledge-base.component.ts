@@ -22,6 +22,8 @@ export class KnowledgeBaseComponent implements OnInit {
   knowledge: KnowledgeItem[] = [];
   category = 'architecture';
   selectedFile: File | null = null;
+  loading = true;
+  uploading = false;
   error = '';
 
   ngOnInit(): void {
@@ -29,13 +31,16 @@ export class KnowledgeBaseComponent implements OnInit {
   }
 
   loadKnowledge(): void {
+    this.loading = true;
+    this.error = '';
     this.api.knowledge().subscribe({
       next: items => {
         this.knowledge = items;
-        this.error = '';
+        this.loading = false;
       },
       error: error => {
         this.error = error.error?.detail || 'Could not load the knowledge base.';
+        this.loading = false;
       }
     });
   }
@@ -50,13 +55,17 @@ export class KnowledgeBaseComponent implements OnInit {
       return;
     }
 
+    this.uploading = true;
+    this.error = '';
     this.api.upload(this.selectedFile, this.category).subscribe({
       next: () => {
         this.selectedFile = null;
+        this.uploading = false;
         this.loadKnowledge();
       },
       error: error => {
         this.error = error.error?.detail || 'Upload failed';
+        this.uploading = false;
       }
     });
   }

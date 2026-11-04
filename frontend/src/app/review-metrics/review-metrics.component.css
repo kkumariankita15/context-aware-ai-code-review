@@ -16,6 +16,34 @@
   transition: transform .18s ease, box-shadow .18s ease;
 }
 
+.metric-skeleton {
+  display: flex;
+  min-height: 119px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+.metric-skeleton:hover {
+  transform: none;
+  box-shadow: var(--shadow-card);
+}
+
+.skeleton-label {
+  width: 58%;
+  height: 12px;
+}
+
+.skeleton-value {
+  width: 38%;
+  height: 30px;
+}
+
+.skeleton-caption {
+  width: 72%;
+  height: 10px;
+}
+
 .metric:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 28px rgba(37, 39, 72, .08);
@@ -67,6 +95,6 @@
   }
 
   .metric strong {
-    font-size: 27.0px;
+  font-size: 27.0px;
   }
 }

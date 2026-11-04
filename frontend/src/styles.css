@@ -29,6 +29,37 @@
   box-sizing: border-box;
 }
 
+.skeleton {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-line) 72%, var(--color-surface));
+}
+
+.skeleton::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, white 75%, transparent), transparent);
+  content: '';
+  transform: translateX(-100%);
+  animation: skeleton-shimmer 1.45s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  to { transform: translateX(100%); }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
 body {
   min-width: 320px;
   min-height: 100vh;
