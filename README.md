@@ -1,6 +1,6 @@
 # Context-Aware AI Code Review Platform
 
-A runnable demo of a multi-agent code review platform: **Python + FastAPI backend, Angular 19 frontend, SQLite persistence, project knowledge ingestion, GitHub PR integration, and optional OpenAI-powered contextual review.**
+A runnable demo of a multi-agent code review platform: **Python + FastAPI backend, Angular 19 frontend, PostgreSQL persistence, project knowledge ingestion, GitHub PR integration, and optional OpenAI-powered contextual review.**
 
 > This is a demo/reference implementation, not a production security scanner. Findings are advisory. Human review remains required.
 
@@ -11,31 +11,15 @@ A runnable demo of a multi-agent code review platform: **Python + FastAPI backen
 - **Knowledge base:** upload architecture notes, coding conventions, ESLint/Sonar rules, design-system docs, approved component notes, and prior review feedback. Files can also be placed in `backend/knowledge/`.
 - **GitHub PR integration:** fetch a PR diff using a GitHub token; optionally publish the review findings with an additional comment from the review results. A webhook endpoint supports `opened`, `synchronize`, and `reopened` events.
 - **Dashboard:** a multi-page workspace for metrics, reviews, review history, knowledge sources, and appearance customization.
-- **SQLite:** reviews and ingested knowledge persist locally.
+- **PostgreSQL:** reviews and ingested knowledge persist in the database service.
 
 ## 2. Architecture
 
-```text
-Angular Dashboard :4200
-       |
-       | REST / JSON
-       v
-FastAPI :8000 ---- GitHub REST API
-       |
-       +-- Review Orchestrator
-       |     +-- Security Agent
-       |     +-- Architecture Agent
-       |     +-- Standards Agent
-       |     +-- Code Quality Agent
-       |     +-- Optional AI Context Agent (OpenAI)
-       |
-       +-- Knowledge Retriever --> SQLite knowledge table
-       +-- Review Repository ----> SQLite reviews table
-```
-
-The current knowledge retriever is intentionally simple keyword matching so the demo runs without vector infrastructure. A production version should use chunking, embeddings, a vector database, document ownership/versioning, and project/repository scoping.
-
-Backend review agents are organized under `backend/app/agents/`: each specialist has its own module, `common.py` contains shared diff and finding helpers, and `review.py` coordinates the agents and scoring.
+For a readable guide to backend/frontend functionality and implementation, see
+the [Project knowledge base](docs/PROJECT_KNOWLEDGE_BASE.md). The separate
+[architecture diagram](docs/ARCHITECTURE.md) shows runtime components and data
+flows. The retriever currently uses simple keyword matching rather than vector
+search.
 
 ## 3. Requirements
 
