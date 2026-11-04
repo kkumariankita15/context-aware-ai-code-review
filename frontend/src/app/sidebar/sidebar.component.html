@@ -1,14 +1,39 @@
 <aside class="sidebar">
   <div class="brand">
-    <div class="brand-icon">✳</div>
-    <div><b>ReviewPilot</b><small>AI engineering quality</small></div>
+    <div class="brand-icon" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="brand-copy"><b>ReviewPilot<span>.</span></b><small>AI code intelligence</small></div>
   </div>
   <div class="nav-label">WORKSPACE</div>
-  <button class="nav" [class.active]="activeTab === 'overview'" (click)="tabChange.emit('overview')">▦ &nbsp; Overview</button>
-  <button class="nav" [class.active]="activeTab === 'review'" (click)="tabChange.emit('review')">⌘ &nbsp; New review</button>
-  <button class="nav" [class.active]="activeTab === 'knowledge'" (click)="tabChange.emit('knowledge')">◈ &nbsp; Knowledge base</button>
+  <nav class="primary-nav" aria-label="Workspace navigation">
+    <a class="nav" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="3.5" width="7" height="4" rx="1.5"></rect><rect x="13.5" y="11.5" width="7" height="9" rx="1.5"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"></rect></svg>
+      <span>Overview</span>
+    </a>
+    <a class="nav" routerLink="/review" routerLinkActive="active" ariaCurrentWhenActive="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 14 9l5.5 2-5.5 2-2 5.5L10 13l-5.5-2L10 9l2-5.5Z"></path><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"></path></svg>
+      <span>New review</span>
+      <kbd>⌘ K</kbd>
+    </a>
+    <a class="nav" routerLink="/history" routerLinkActive="active" ariaCurrentWhenActive="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 12a8.2 8.2 0 1 0 2.4-5.8L3.8 8.5"></path><path d="M3.8 4.5v4h4"></path><path d="M12 7.5V12l3 2"></path></svg>
+      <span>Review history</span>
+      <span class="nav-count" *ngIf="reviewCount">{{reviewCount}}</span>
+    </a>
+    <a class="nav" routerLink="/knowledge" routerLinkActive="active" ariaCurrentWhenActive="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 5.5A2.5 2.5 0 0 1 7 3h12.5v17H7a2.5 2.5 0 0 1-2.5-2.5v-12Z"></path><path d="M4.5 16.5A2.5 2.5 0 0 1 7 14h12.5M9 7h6M9 10h6"></path></svg>
+      <span>Knowledge base</span>
+    </a>
+  </nav>
+  <div class="nav-label preferences-label">PREFERENCES</div>
+  <a class="nav" routerLink="/appearance" routerLinkActive="active" ariaCurrentWhenActive="page">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18h1.2a2 2 0 0 0 1.4-3.4 1.6 1.6 0 0 1 1.1-2.7h1.2A4.1 4.1 0 0 0 21 10.8C21 6.5 17 3 12 3Z"></path><path d="M7.5 10h.1M10 6.8h.1m4.2 0h.1m2.1 3.2h.1"></path></svg>
+    <span>Appearance</span>
+  </a>
   <div class="sidebar-bottom">
-    <span class="online"></span> API connection <b>{{apiStatus}}</b>
-    <small>Multi-agent review engine</small>
+    <div class="connection-card">
+      <div class="connection-icon">✳</div>
+      <div><b>Review engine</b><small><i [class.offline]="apiStatus === 'offline'"></i>{{apiStatus === 'connected' ? 'Connected and ready' : apiStatus === 'offline' ? 'API unavailable' : 'Connecting…'}}</small></div>
+    </div>
+    <div class="profile-row"><span class="profile-avatar">R</span><span><b>Your workspace</b><small>Personal plan</small></span><span class="profile-menu">···</span></div>
   </div>
 </aside>

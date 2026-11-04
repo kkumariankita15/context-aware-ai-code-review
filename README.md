@@ -10,7 +10,7 @@ A runnable demo of a multi-agent code review platform: **Python + FastAPI backen
 - **Optional AI context agent:** when `OPENAI_API_KEY` is configured, an LLM reviews the diff using retrieved project guidance and contributes additional findings.
 - **Knowledge base:** upload architecture notes, coding conventions, ESLint/Sonar rules, design-system docs, approved component notes, and prior review feedback. Files can also be placed in `backend/knowledge/`.
 - **GitHub PR integration:** fetch a PR diff using a GitHub token; optionally publish the review findings with an additional comment from the review results. A webhook endpoint supports `opened`, `synchronize`, and `reopened` events.
-- **Dashboard:** metrics, review findings, recent review history, and knowledge source management.
+- **Dashboard:** a multi-page workspace for metrics, reviews, review history, knowledge sources, and appearance customization.
 - **SQLite:** reviews and ingested knowledge persist locally.
 
 ## 2. Architecture
@@ -34,6 +34,8 @@ FastAPI :8000 ---- GitHub REST API
 ```
 
 The current knowledge retriever is intentionally simple keyword matching so the demo runs without vector infrastructure. A production version should use chunking, embeddings, a vector database, document ownership/versioning, and project/repository scoping.
+
+Backend review agents are organized under `backend/app/agents/`: each specialist has its own module, `common.py` contains shared diff and finding helpers, and `review.py` coordinates the agents and scoring.
 
 ## 3. Requirements
 
@@ -76,6 +78,8 @@ npm start
 Open http://localhost:4200.
 
 The dashboard includes a prefilled sample diff. Click **Analyze changes** to run the local agents.
+
+Choose **Appearance** in the workspace navigation to switch between accent presets or pick a custom color. The choice is saved in browser storage. To change the default look in code, edit the CSS custom properties in `frontend/src/styles.css` (`--color-primary`, `--color-primary-strong`, `--color-primary-soft`, `--color-accent`, plus the surface, text, border, radius, and shadow tokens).
 
 ## 5. Optional integrations
 

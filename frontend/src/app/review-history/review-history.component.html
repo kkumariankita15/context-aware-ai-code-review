@@ -1,18 +1,49 @@
 <section class="panel">
   <div class="panel-head">
     <div><h2>Recent reviews</h2><p>Review activity in this workspace</p></div>
-    <button class="text-button" (click)="refresh.emit()">Refresh ↻</button>
+    <button class="text-button" [disabled]="loading" (click)="load()">
+      {{loading ? 'Refreshing…' : 'Refresh ↻'}}
+    </button>
   </div>
-  <button
-    type="button"
-    class="history-row"
-    *ngFor="let review of reviews"
-    [class.selected]="review.id === selectedReviewId"
-    [attr.aria-pressed]="review.id === selectedReviewId"
-    (click)="reviewSelected.emit(review)">
-    <div><b>{{review.title}}</b><small>{{review.repository}} · {{review.created_at}}</small></div>
-    <span>{{review.findings.length}} findings</span>
-    <strong>{{review.score}}/100</strong>
-  </button>
-  <div *ngIf="!reviews.length" class="empty">No reviews yet. Start your first review above.</div>
+  <div *ngIf="loading && !reviews.length" class="history-loading" role="status" aria-label="Loading reviews">
+    <div class="history-skeleton-row" *ngFor="let row of [1, 2, 3]" aria-hidden="true">
+      <div class="history-skeleton-copy">
+        <span class="skeleton history-skeleton-title"></span>
+        <span class="skeleton history-skeleton-subtitle"></span>
+      </div>
+      <span class="skeleton history-skeleton-count"></span>
+      <span class="skeleton history-skeleton-score"></span>
+    </div>
+    <span class="visually-hidden">Loading reviews…</span>
+  </div>
+  <div class="history-entry" *ngFor="let review of reviews">
+    <button
+      type="button"
+      class="history-row"
+      [class.selected]="review.id === expandedReviewId"
+      [attr.aria-expanded]="review.id === expandedReviewId"
+      [attr.aria-controls]="'review-details-' + review.id"
+      (click)="toggleReview(review)">
+      <div class="review-title"><b>{{review.title}}</b><small>{{review.repository}} · {{review.created_at}}</small></div>
+      <span>{{review.findings.length}} findings</span>
+      <strong>{{review.score}}/100</strong>
+      <span class="expand-icon" [class.expanded]="review.id === expandedReviewId" aria-hidden="true">⌄</span>
+    </button>
+    <div
+      *ngIf="review.id === expandedReviewId"
+      class="expanded-review"
+      [id]="'review-details-' + review.id">
+      <app-review-results [review]="review"></app-review-results>
+    </div>
+  </div>
+  <div *ngIf="error && !reviews.length" class="empty empty-error" role="alert">
+    <strong>Reviews couldn’t be loaded</strong>
+    <span>{{error}}</span>
+    <button type="button" class="text-button" (click)="load()">Try again</button>
+  </div>
+  <div *ngIf="!loading && !error && !reviews.length" class="empty">
+    <strong>No reviews found yet</strong>
+    <span>Start a code review to see your findings and scores here.</span>
+    <a class="text-button" routerLink="/review">Start a review <span aria-hidden="true">→</span></a>
+  </div>
 </section>

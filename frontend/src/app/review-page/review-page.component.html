@@ -1,0 +1,23 @@
+<section class="page-content">
+  <app-review-form
+    [loading]="loading"
+    [error]="error"
+    (diffReview)="runReview($event)"
+    (githubReview)="runGithub($event)">
+  </app-review-form>
+
+  <section class="review-pending-card" *ngIf="loading" role="status" aria-label="Review in progress">
+    <div class="review-pending-heading">
+      <span class="skeleton review-pending-kicker"></span>
+      <span class="skeleton review-pending-title"></span>
+    </div>
+    <span class="skeleton review-pending-summary"></span>
+    <span class="skeleton review-pending-line"></span>
+    <span class="skeleton review-pending-line short"></span>
+    <span class="visually-hidden">Your code is being reviewed. Findings will appear here shortly.</span>
+  </section>
+
+  <div #reviewResults class="review-results-anchor" *ngIf="displayedReview">
+    <app-review-results [review]="displayedReview"></app-review-results>
+  </div>
+</section>

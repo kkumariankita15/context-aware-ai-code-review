@@ -1,100 +1,68 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReviewService, Review } from './review.service';
+import { AsyncPipe, CommonModule } from '@angular/common';
+import { Component, HostListener, OnInit, ViewEncapsulation, inject } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
+import { ApiStatusService } from './api-status.service';
+import { HttpLoadingService } from './http-loading.service';
+import { ReviewService } from './review.service';
 import { SidebarComponent } from './sidebar/sidebar.component';
-import { ReviewFormComponent, DiffReviewRequest, GithubReviewRequest } from './review-form/review-form.component';
-import { ReviewMetricsComponent } from './review-metrics/review-metrics.component';
-import { ReviewResultsComponent } from './review-results/review-results.component';
-import { ReviewHistoryComponent } from './review-history/review-history.component';
-import { KnowledgeBaseComponent } from './knowledge-base/knowledge-base.component';
+import { ThemeService } from './theme.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    CommonModule,
-    SidebarComponent,
-    ReviewFormComponent,
-    ReviewMetricsComponent,
-    ReviewResultsComponent,
-    ReviewHistoryComponent,
-    KnowledgeBaseComponent
-  ],
+  imports: [AsyncPipe, CommonModule, RouterLink, RouterOutlet, SidebarComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.css',
+  encapsulation: ViewEncapsulation.None
 })
 export class AppComponent implements OnInit {
-  private api = inject(ReviewService);
+  private readonly router = inject(Router);
+  private readonly themes = inject(ThemeService);
+  readonly requestInProgress$ = inject(HttpLoadingService).loading$;
+  readonly apiStatus$ = inject(ApiStatusService).status$;
+  readonly reviewCount$ = inject(ReviewService).reviewCount$;
 
-  tab = 'overview';
-  reviews: Review[] = [];
-  latestReview: Review | null = null;
-  loading = false;
-  error = '';
-  apiStatus = 'checking';
+  currentPath = '/';
 
-  get findingCount(): number {
-    return this.reviews.reduce((count, review) => count + review.findings.length, 0);
+  private readonly pageTitles: Record<string, string> = {
+    '/': 'Overview',
+    '/review': 'New review',
+    '/history': 'Review history',
+    '/knowledge': 'Knowledge base',
+    '/appearance': 'Appearance'
+  };
+
+  private readonly pageDescriptions: Record<string, string> = {
+    '/': 'A clear view of your team’s code quality and latest insights.',
+    '/review': 'Bring a pull request or diff. Your agents will take it from here.',
+    '/history': 'Explore past reviews and revisit the findings that matter.',
+    '/knowledge': 'Give your agents the project context they need to be helpful.',
+    '/appearance': 'Make your review workspace feel like your own.'
+  };
+
+  get pageTitle(): string {
+    return this.pageTitles[this.currentPath] || this.pageTitles['/'];
   }
 
-  get averageScore(): number {
-    return this.reviews.length
-      ? Math.round(this.reviews.reduce((total, review) => total + review.score, 0) / this.reviews.length)
-      : 0;
+  get pageDescription(): string {
+    return this.pageDescriptions[this.currentPath] || this.pageDescriptions['/'];
   }
 
   ngOnInit(): void {
-    this.load();
+    this.themes.restore();
+    this.router.events.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(event => {
+        this.currentPath = event.urlAfterRedirects.split('?')[0];
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
   }
 
-  load(): void {
-    this.api.reviews().subscribe({
-      next: reviews => {
-        this.reviews = reviews;
-        this.apiStatus = 'connected';
-        if (!this.latestReview && reviews.length) {
-          this.latestReview = reviews[0];
-        }
-      },
-      error: () => this.apiStatus = 'offline'
-    });
-  }
-
-  runReview(request: DiffReviewRequest): void {
-    this.loading = true;
-    this.error = '';
-    this.api.analyze(request).subscribe({
-      next: review => {
-        this.latestReview = review;
-        this.loading = false;
-        this.load();
-      },
-      error: error => {
-        this.error = error.error?.detail || 'Could not reach the API. Is the backend running?';
-        this.loading = false;
-      }
-    });
-  }
-
-  runGithub(request: GithubReviewRequest): void {
-    this.loading = true;
-    this.error = '';
-    this.api.analyzePr(request.owner, request.repo, request.number, request.postComment).subscribe({
-      next: review => {
-        this.latestReview = review;
-        this.loading = false;
-        this.load();
-      },
-      error: error => {
-        this.error = error.error?.detail || 'GitHub analysis failed';
-        this.loading = false;
-      }
-    });
-  }
-
-  selectReview(review: Review): void {
-    this.latestReview = review;
-    this.tab = 'overview';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardShortcut(event: KeyboardEvent): void {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      this.router.navigate(['/review']);
+    }
   }
 }

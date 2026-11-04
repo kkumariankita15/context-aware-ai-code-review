@@ -1,0 +1,173 @@
+<section class="page-content">
+  <app-review-metrics
+    [loading]="loading && !reviews.length"
+    [reviewCount]="reviews.length"
+    [averageScore]="averageScore"
+    [findingCount]="findingCount"
+    [highPriorityFindingCount]="highPriorityFindingCount">
+  </app-review-metrics>
+
+  <section class="overview-loading" *ngIf="loading && !reviews.length" role="status" aria-label="Loading workspace overview">
+    <article class="overview-card overview-skeleton-card" aria-hidden="true">
+      <div class="overview-skeleton-heading">
+        <span class="skeleton skeleton-kicker"></span>
+        <span class="skeleton skeleton-heading"></span>
+      </div>
+      <div class="overview-skeleton-snapshot">
+        <span class="skeleton skeleton-score"></span>
+        <span class="overview-skeleton-copy">
+          <span class="skeleton skeleton-label"></span>
+          <span class="skeleton skeleton-title"></span>
+          <span class="skeleton skeleton-description"></span>
+        </span>
+      </div>
+      <div class="overview-skeleton-stats">
+        <span class="skeleton"></span><span class="skeleton"></span>
+        <span class="skeleton"></span><span class="skeleton"></span>
+      </div>
+    </article>
+    <article class="overview-card overview-skeleton-card activity-skeleton-card" aria-hidden="true">
+      <div class="overview-skeleton-heading">
+        <span class="skeleton skeleton-kicker"></span>
+        <span class="skeleton skeleton-heading"></span>
+      </div>
+      <div class="activity-skeleton-row" *ngFor="let row of [1, 2, 3]">
+        <span class="skeleton activity-skeleton-icon"></span>
+        <span class="activity-skeleton-copy">
+          <span class="skeleton activity-skeleton-title"></span>
+          <span class="skeleton activity-skeleton-subtitle"></span>
+        </span>
+        <span class="skeleton activity-skeleton-score"></span>
+      </div>
+    </article>
+    <span class="visually-hidden">Loading your review activity…</span>
+  </section>
+
+  <section class="welcome-card" *ngIf="!loading && !error && !reviews.length">
+    <div class="welcome-mark" aria-hidden="true">✳</div>
+    <div class="eyebrow">YOUR AI REVIEW WORKSPACE</div>
+    <h2>Ship thoughtful code, <span>with confidence.</span></h2>
+    <p>Connect a pull request or paste a diff. Your specialist agents will review it against your project context.</p>
+    <button class="primary" routerLink="/review">Start your first review <span aria-hidden="true">→</span></button>
+  </section>
+
+  <section class="overview-card overview-error-card" *ngIf="!loading && error && !reviews.length" role="alert">
+    <span class="overview-error-icon" aria-hidden="true">!</span>
+    <div>
+      <h2>Workspace reviews couldn’t be loaded</h2>
+      <p>{{error}}</p>
+      <button type="button" class="text-button" (click)="load()">Try again <span aria-hidden="true">→</span></button>
+    </div>
+  </section>
+
+  <section class="overview-grid" *ngIf="reviews.length">
+    <article class="overview-card latest-summary">
+      <div class="overview-card-head">
+        <div>
+          <span class="section-kicker">ALL REVIEWS</span>
+          <h2>Workspace review health</h2>
+        </div>
+        <a class="text-button" routerLink="/history">View reviews <span aria-hidden="true">→</span></a>
+      </div>
+
+      <div class="review-snapshot">
+        <div class="score-summary" [class.warn]="averageScore < 70">
+          <strong>{{averageScore}}</strong>
+          <span>AVERAGE<br>SCORE</span>
+        </div>
+        <div class="snapshot-copy">
+          <span class="repository-label">WORKSPACE AVERAGE</span>
+          <h3>{{reviews.length}} reviews analyzed</h3>
+          <p>Quality score and finding breakdown across all available reviews.</p>
+        </div>
+      </div>
+
+      <div class="finding-breakdown" aria-label="All review findings by severity">
+        <div class="finding-stat critical-stat"><span class="severity-dot"></span><strong>{{severityCount('critical')}}</strong><small>Critical</small></div>
+        <div class="finding-stat high-stat"><span class="severity-dot"></span><strong>{{severityCount('high')}}</strong><small>High</small></div>
+        <div class="finding-stat medium-stat"><span class="severity-dot"></span><strong>{{severityCount('medium')}}</strong><small>Medium</small></div>
+        <div class="finding-stat low-stat"><span class="severity-dot"></span><strong>{{severityCount('low')}}</strong><small>Low</small></div>
+      </div>
+    </article>
+
+    <article class="overview-card activity-card">
+      <div class="overview-card-head">
+        <div>
+          <span class="section-kicker">WORKSPACE</span>
+          <h2>Recent activity</h2>
+        </div>
+        <a class="text-button" routerLink="/history">View all <span aria-hidden="true">→</span></a>
+      </div>
+
+      <button type="button" class="activity-row" *ngFor="let review of recentReviews" (click)="selectReview(review)">
+        <span class="activity-icon" aria-hidden="true">⌘</span>
+        <span class="activity-copy">
+          <strong>{{review.title}}</strong>
+          <small>{{review.repository}} · {{review.created_at | date:'MMM d'}}</small>
+        </span>
+        <span class="activity-findings">{{review.findings.length}} <small>findings</small></span>
+        <span class="activity-score">{{review.score}}</span>
+      </button>
+    </article>
+  </section>
+
+  <section class="overview-guidance" aria-label="How to use ReviewPilot">
+    <article class="overview-card getting-started-card">
+      <div class="overview-card-head">
+        <div>
+          <span class="section-kicker">A SIMPLE WORKFLOW</span>
+          <h2>How to use ReviewPilot</h2>
+        </div>
+        <span class="guide-icon" aria-hidden="true">↗</span>
+      </div>
+
+      <ol class="workflow-steps">
+        <li>
+          <span class="step-number">01</span>
+          <span class="step-copy"><strong>Add project context <small>OPTIONAL</small></strong><span>Upload architecture notes or coding standards in Knowledge base for more relevant feedback.</span></span>
+          <a class="step-link" aria-label="Open knowledge base" routerLink="/knowledge">→</a>
+        </li>
+        <li>
+          <span class="step-number">02</span>
+          <span class="step-copy"><strong>Submit a change</strong><span>Analyze a GitHub pull request or paste a unified diff to start your review.</span></span>
+          <a class="step-link" aria-label="Start a code review" routerLink="/review">→</a>
+        </li>
+        <li>
+          <span class="step-number">03</span>
+          <span class="step-copy"><strong>Review findings & act</strong><span>Check severity, file, and recommendations; verify findings before sharing or posting.</span></span>
+          <a class="step-link" aria-label="View review history" [routerLink]="reviews.length ? '/history' : '/review'">→</a>
+        </li>
+      </ol>
+    </article>
+
+    <article class="overview-card agents-card">
+      <div class="overview-card-head">
+        <div>
+          <span class="section-kicker">SPECIALIST REVIEW</span>
+          <h2>Meet your review agents</h2>
+        </div>
+        <span class="agent-count">4 agents</span>
+      </div>
+
+      <div class="agent-grid">
+        <article class="agent-tile">
+          <span class="agent-icon security" aria-hidden="true">S</span>
+          <div class="agent-copy"><h3>Security</h3><span>Protect the codebase</span><p>Flags risky patterns such as exposed credentials, unsafe evaluation, and insecure URLs.</p></div>
+        </article>
+        <article class="agent-tile">
+          <span class="agent-icon architecture" aria-hidden="true">A</span>
+          <div class="agent-copy"><h3>Architecture</h3><span>Keep boundaries clear</span><p>Looks for changes that may couple application layers or leave unfinished work behind.</p></div>
+        </article>
+        <article class="agent-tile">
+          <span class="agent-icon standards" aria-hidden="true">ST</span>
+          <div class="agent-copy"><h3>Standards</h3><span>Follow team conventions</span><p>Checks for debug logging, loose TypeScript types, and inconsistent coding practices.</p></div>
+        </article>
+        <article class="agent-tile">
+          <span class="agent-icon quality" aria-hidden="true">Q</span>
+          <div class="agent-copy"><h3>Code quality</h3><span>Improve clarity & reliability</span><p>Surfaces readability concerns and code that may hide or swallow errors.</p></div>
+        </article>
+      </div>
+      <p class="optional-agent-note"><span aria-hidden="true">✦</span> Optional AI context review can add project-aware feedback when configured.</p>
+    </article>
+  </section>
+</section>

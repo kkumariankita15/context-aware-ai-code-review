@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface Finding {
   id: string; agent: string; severity: string; category: string; title: string;
@@ -14,6 +14,17 @@ export interface Review {
 export class ReviewService {
   private http = inject(HttpClient);
   private base = 'http://localhost:8000/api';
+  private readonly reviewCountSubject = new BehaviorSubject(0);
+  readonly reviewCount$ = this.reviewCountSubject.asObservable();
+
+  setReviewCount(count: number): void {
+    this.reviewCountSubject.next(count);
+  }
+
+  incrementReviewCount(): void {
+    this.reviewCountSubject.next(this.reviewCountSubject.value + 1);
+  }
+
   reviews(): Observable<Review[]> { return this.http.get<Review[]>(`${this.base}/reviews`); }
   analyze(payload: {repository: string; title: string; diff: string}): Observable<Review> {
     return this.http.post<Review>(`${this.base}/reviews/analyze`, payload);

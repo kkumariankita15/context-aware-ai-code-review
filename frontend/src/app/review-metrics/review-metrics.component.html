@@ -1,4 +1,13 @@
-<section class="metrics">
+<section class="metrics" [attr.aria-busy]="loading">
+  <ng-container *ngIf="loading; else loadedMetrics">
+    <article class="metric metric-skeleton" *ngFor="let card of [1, 2, 3, 4]" aria-hidden="true">
+      <span class="skeleton skeleton-label"></span>
+      <span class="skeleton skeleton-value"></span>
+      <span class="skeleton skeleton-caption"></span>
+    </article>
+    <span class="visually-hidden" role="status">Loading review metrics…</span>
+  </ng-container>
+  <ng-template #loadedMetrics>
   <div class="metric">
     <span>Total reviews</span>
     <strong>{{reviewCount}}</strong>
@@ -15,8 +24,9 @@
     <small>Across completed reviews</small>
   </div>
   <div class="metric">
-    <span>Specialist agents</span>
-    <strong>4<span class="plus"> + AI</span></strong>
-    <small>Security · Architecture · Standards · Quality</small>
+    <span>High-priority findings</span>
+    <strong>{{highPriorityFindingCount}}</strong>
+    <small>Critical and high severity across reviews</small>
   </div>
+  </ng-template>
 </section>
