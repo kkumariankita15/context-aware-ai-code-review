@@ -50,7 +50,7 @@ export class KnowledgeBaseComponent implements OnInit {
     this.error = '';
   }
 
-  upload(): void {
+  upload(fileInput: HTMLInputElement): void {
     if (!this.selectedFile) {
       return;
     }
@@ -60,6 +60,7 @@ export class KnowledgeBaseComponent implements OnInit {
     this.api.upload(this.selectedFile, this.category).subscribe({
       next: () => {
         this.selectedFile = null;
+        fileInput.value = '';
         this.uploading = false;
         this.loadKnowledge();
       },

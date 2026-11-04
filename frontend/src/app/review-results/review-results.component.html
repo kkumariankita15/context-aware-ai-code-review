@@ -1,9 +1,40 @@
 <section class="panel">
   <div class="panel-head">
-    <div><h2>Latest review results</h2><p>{{review.repository}} · {{review.title}}</p></div>
+    <div class="review-heading">
+      <span class="section-kicker">CODE REVIEW</span>
+      <h2>Review results</h2>
+      <p>{{review.repository}} · {{review.title}}</p>
+    </div>
     <div class="score" [class.warn]="review.score < 70">{{review.score}}<small>/100</small></div>
   </div>
   <p class="summary">{{review.summary}}</p>
+  <section class="agent-overview" *ngIf="agentGroups.length" aria-labelledby="agent-overview-heading">
+    <div class="subsection-heading">
+      <div>
+        <h3 id="agent-overview-heading">Agent breakdown</h3>
+        <p>Each specialist reviews a different aspect of the change.</p>
+      </div>
+      <span class="total-findings">{{review.findings.length}} {{review.findings.length === 1 ? 'finding' : 'findings'}}</span>
+    </div>
+    <div class="agent-cards">
+      <button
+        type="button"
+        class="agent-card"
+        *ngFor="let group of agentGroups"
+        [ngClass]="'agent-' + group.id"
+        [class.selected]="selectedAgentId === group.id"
+        [attr.aria-expanded]="selectedAgentId === group.id"
+        [attr.aria-controls]="'agent-findings-' + group.id"
+        (click)="toggleAgent(group.id)">
+        <span class="agent-mark" aria-hidden="true">{{group.name.substring(0, 1)}}</span>
+        <div class="agent-card-copy">
+          <strong>{{group.name}}</strong>
+          <span>{{group.focus}}</span>
+        </div>
+        <span class="agent-count">{{group.findings.length}}</span>
+      </button>
+    </div>
+  </section>
   <div *ngIf="review.pull_request != null" class="github-comment">
     <label for="additional-comment">Optional comment to include on GitHub</label>
     <textarea
@@ -28,14 +59,46 @@
     <summary>View GitHub pull request diff</summary>
     <pre>{{review.diff}}</pre>
   </details>
-  <div class="finding" *ngFor="let finding of review.findings">
-    <span class="severity" [class]="finding.severity">{{finding.severity}}</span>
-    <div class="finding-body">
-      <b>{{finding.title}}</b>
-      <small>{{finding.file}}<span *ngIf="finding.line"> :{{finding.line}}</span> · {{finding.agent}}</small>
-      <p>{{finding.explanation}}</p>
-      <div class="recommend">↳ {{finding.recommendation}}</div>
+  <section class="findings-section" *ngIf="selectedAgentGroup as group" aria-labelledby="findings-heading">
+    <div class="subsection-heading findings-heading">
+      <div>
+        <h3 id="findings-heading">{{group.name}} findings</h3>
+        <p>{{group.focus}}</p>
+      </div>
+      <button type="button" class="close-agent-findings" (click)="toggleAgent(group.id)" aria-label="Close agent findings">Close</button>
     </div>
+    <section
+      class="agent-group"
+      [ngClass]="'agent-' + group.id"
+      [id]="'agent-findings-' + group.id"
+      [attr.aria-label]="group.name + ' findings'">
+      <header class="agent-group-heading">
+        <span class="agent-mark" aria-hidden="true">{{group.name.substring(0, 1)}}</span>
+        <div class="agent-group-copy">
+          <h4>{{group.name}}</h4>
+        </div>
+        <span class="group-count">{{group.findings.length}}</span>
+      </header>
+      <article class="finding-row" *ngFor="let finding of group.findings">
+        <div class="finding-topline">
+          <span class="severity" [ngClass]="'severity-' + finding.severity">{{finding.severity}}</span>
+          <h5>{{finding.title}}</h5>
+          <span class="category">{{finding.category}}</span>
+        </div>
+        <div class="finding-location">
+          <span>{{finding.file}}<span *ngIf="finding.line">:{{finding.line}}</span></span>
+        </div>
+        <p class="finding-explanation">{{finding.explanation}}</p>
+        <div class="recommend">
+          <span class="recommend-label">Suggested action</span>
+          <span>{{finding.recommendation}}</span>
+        </div>
+      </article>
+    </section>
+  </section>
+  <div *ngIf="!review.findings.length" class="empty">
+    <span class="empty-mark" aria-hidden="true">✓</span>
+    <strong>No findings reported</strong>
+    <span>The review completed without actionable or informational observations.</span>
   </div>
-  <div *ngIf="!review.findings.length" class="empty">No findings from the configured checks. Great work.</div>
 </section>

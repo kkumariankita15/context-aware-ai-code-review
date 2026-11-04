@@ -21,6 +21,10 @@ export class ReviewService {
     this.reviewCountSubject.next(count);
   }
 
+  incrementReviewCount(): void {
+    this.reviewCountSubject.next(this.reviewCountSubject.value + 1);
+  }
+
   reviews(): Observable<Review[]> { return this.http.get<Review[]>(`${this.base}/reviews`); }
   analyze(payload: {repository: string; title: string; diff: string}): Observable<Review> {
     return this.http.post<Review>(`${this.base}/reviews/analyze`, payload);

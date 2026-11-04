@@ -47,6 +47,7 @@ export class ReviewPageComponent {
   }
 
   private showReviewResults(review: Review): void {
+    this.api.incrementReviewCount();
     this.displayedReview = review;
     this.loading = false;
     this.changeDetector.detectChanges();

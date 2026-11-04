@@ -4,7 +4,19 @@
     <span class="tag">{{loading ? '…' : knowledge.length}} SOURCES</span>
   </div>
   <div class="upload-row">
-    <input type="file" #fileInput (change)="onFile($event)">
+    <label class="file-picker" [class.has-file]="selectedFile">
+      <input type="file" #fileInput aria-label="Choose a knowledge file" (change)="onFile($event)">
+      <span class="file-picker-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14.5v3A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="file-picker-copy">
+        <strong>{{selectedFile?.name || 'Choose a file'}}</strong>
+        <small>{{selectedFile ? 'Ready to add to your knowledge base' : 'Select text-based project context'}}</small>
+      </span>
+      <span class="browse-button">{{selectedFile ? 'Change file' : 'Browse'}}</span>
+    </label>
     <select [(ngModel)]="category">
       <option>architecture</option>
       <option>coding-standards</option>
@@ -12,7 +24,7 @@
       <option>eslint-sonar</option>
       <option>previous-review</option>
     </select>
-    <button class="primary" [disabled]="!selectedFile || uploading" (click)="upload()">
+    <button class="primary" [disabled]="!selectedFile || uploading" (click)="upload(fileInput)">
       {{uploading ? 'Uploading…' : 'Upload context'}}
     </button>
   </div>
@@ -37,5 +49,5 @@
     <span>Add project context to help agents give more relevant feedback.</span>
     <button type="button" class="text-button" (click)="fileInput.click()">Choose a file to add <span aria-hidden="true">→</span></button>
   </div>
-  <p class="hint">Tip: place documents in backend/knowledge before startup, or upload text-based files here. The demo uses keyword retrieval; see README for a vector-search upgrade path.</p>
+  <p class="hint">Add a text-based file with your project’s architecture, coding standards, or design-system details. Choose a category, select a file, and upload it to give reviews helpful project context.</p>
 </section>

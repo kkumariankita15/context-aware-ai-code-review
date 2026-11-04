@@ -35,6 +35,8 @@ FastAPI :8000 ---- GitHub REST API
 
 The current knowledge retriever is intentionally simple keyword matching so the demo runs without vector infrastructure. A production version should use chunking, embeddings, a vector database, document ownership/versioning, and project/repository scoping.
 
+Backend review agents are organized under `backend/app/agents/`: each specialist has its own module, `common.py` contains shared diff and finding helpers, and `review.py` coordinates the agents and scoring.
+
 ## 3. Requirements
 
 - Python 3.11+

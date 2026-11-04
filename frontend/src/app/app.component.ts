@@ -23,10 +23,10 @@ export class AppComponent implements OnInit {
   readonly apiStatus$ = inject(ApiStatusService).status$;
   readonly reviewCount$ = inject(ReviewService).reviewCount$;
 
-  currentPath = '/overview';
+  currentPath = '/';
 
   private readonly pageTitles: Record<string, string> = {
-    '/overview': 'Overview',
+    '/': 'Overview',
     '/review': 'New review',
     '/history': 'Review history',
     '/knowledge': 'Knowledge base',
@@ -34,7 +34,7 @@ export class AppComponent implements OnInit {
   };
 
   private readonly pageDescriptions: Record<string, string> = {
-    '/overview': 'A clear view of your team’s code quality and latest insights.',
+    '/': 'A clear view of your team’s code quality and latest insights.',
     '/review': 'Bring a pull request or diff. Your agents will take it from here.',
     '/history': 'Explore past reviews and revisit the findings that matter.',
     '/knowledge': 'Give your agents the project context they need to be helpful.',
@@ -42,11 +42,11 @@ export class AppComponent implements OnInit {
   };
 
   get pageTitle(): string {
-    return this.pageTitles[this.currentPath] || this.pageTitles['/overview'];
+    return this.pageTitles[this.currentPath] || this.pageTitles['/'];
   }
 
   get pageDescription(): string {
-    return this.pageDescriptions[this.currentPath] || this.pageDescriptions['/overview'];
+    return this.pageDescriptions[this.currentPath] || this.pageDescriptions['/'];
   }
 
   ngOnInit(): void {

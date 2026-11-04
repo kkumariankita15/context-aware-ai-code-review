@@ -1,11 +1,12 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'overview' },
   {
-    path: 'overview',
+    path: '',
+    pathMatch: 'full',
     loadComponent: () => import('./overview/overview.component').then(module => module.OverviewComponent)
   },
+  { path: 'overview', pathMatch: 'full', redirectTo: '' },
   {
     path: 'review',
     loadComponent: () => import('./review-page/review-page.component').then(module => module.ReviewPageComponent)
@@ -22,5 +23,5 @@ export const routes: Routes = [
     path: 'appearance',
     loadComponent: () => import('./appearance/appearance.component').then(module => module.AppearanceComponent)
   },
-  { path: '**', redirectTo: 'overview' }
+  { path: '**', redirectTo: '' }
 ];
