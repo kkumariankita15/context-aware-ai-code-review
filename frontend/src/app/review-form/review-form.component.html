@@ -1,8 +1,17 @@
 <section class="panel">
   <div class="panel-head">
-    <div><h2>Run a code review</h2><p>Paste a unified diff or analyze a GitHub pull request.</p></div>
+    <div><h2>Run a code review</h2><p>Analyze a GitHub pull request or paste a unified diff.</p></div>
     <span class="tag">LIVE ANALYSIS</span>
   </div>
+  <h3>Analyze a GitHub pull request</h3>
+  <div class="grid-github">
+    <input [(ngModel)]="prUrl" placeholder="https://github.com/owner/repository/pull/123">
+    <label class="check"><input type="checkbox" [(ngModel)]="postComment"> Post summary comment</label>
+    <button class="secondary" [disabled]="loading || !prUrl.trim()" (click)="submitGithub()">Analyze GitHub PR →</button>
+  </div>
+  <div class="error">{{validationError || error}}</div>
+  <div class="divider"></div>
+  <h3>Or analyze a unified diff</h3>
   <div class="grid2">
     <label>Repository<input [(ngModel)]="repository" placeholder="acme/web-app"></label>
     <label>Review title<input [(ngModel)]="title" placeholder="Feature: checkout improvements"></label>
@@ -12,14 +21,5 @@
     <button class="primary" [disabled]="loading || !diff.trim()" (click)="submitDiff()">
       {{loading ? 'Analyzing…' : '✳ Analyze changes'}}
     </button>
-    <span class="error">{{validationError || error}}</span>
-  </div>
-  <div class="divider"></div>
-  <h3>Or analyze a GitHub pull request</h3>
-  <div class="grid-github">
-    <input [(ngModel)]="githubRepo" placeholder="GitHub PR URL or owner/repository">
-    <input type="number" [(ngModel)]="prNumber" placeholder="PR number">
-    <label class="check"><input type="checkbox" [(ngModel)]="postComment"> Post summary comment</label>
-    <button class="secondary" [disabled]="loading || !githubRepo" (click)="submitGithub()">Analyze GitHub PR →</button>
   </div>
 </section>

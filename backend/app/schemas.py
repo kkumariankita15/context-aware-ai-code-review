@@ -9,6 +9,11 @@ class AnalyzeRequest(BaseModel):
     diff: str = Field(..., min_length=1)
     branch: Optional[str] = None
 
+
+class PostReviewCommentRequest(BaseModel):
+    additional_comment: Optional[str] = Field(default=None, max_length=2000)
+
+
 class Finding(BaseModel):
     id: str
     agent: str

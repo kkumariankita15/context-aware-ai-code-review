@@ -40,8 +40,7 @@ index 111..222 100644
 +  eval(user.redirect);
 +  return fetch("http://api.example.com/login");
 +}`;
-  githubRepo = '';
-  prNumber: number | null = null;
+  prUrl = '';
   postComment = false;
   validationError = '';
 
@@ -56,37 +55,26 @@ index 111..222 100644
 
   submitGithub(): void {
     this.validationError = '';
-    const prInput = this.githubRepo.trim();
-    let owner = '';
-    let repo = '';
-    let number = this.prNumber;
-
-    if (/^https?:\/\//i.test(prInput) || /^www\.github\.com\//i.test(prInput)) {
-      try {
-        const prUrl = new URL(prInput.startsWith('http') ? prInput : `https://${prInput}`);
-        const pathParts = prUrl.pathname.split('/').filter(Boolean);
-        if (!['github.com', 'www.github.com'].includes(prUrl.hostname) || pathParts[2] !== 'pull') {
-          this.validationError = 'Enter a GitHub pull request URL.';
-          return;
-        }
-        owner = pathParts[0];
-        repo = pathParts[1];
-        number = Number(pathParts[3]);
-      } catch {
-        this.validationError = 'Enter a valid GitHub pull request URL.';
-        return;
-      }
-    } else {
-      const repositoryParts = prInput.split('/');
-      if (repositoryParts.length !== 2) {
-        this.validationError = 'Enter a GitHub PR URL or owner/repository.';
-        return;
-      }
-      [owner, repo] = repositoryParts;
+    let prUrl: URL;
+    try {
+      prUrl = new URL(this.prUrl.trim());
+    } catch {
+      this.validationError = 'Enter a valid GitHub pull request URL.';
+      return;
     }
 
-    if (!owner || !repo || !Number.isInteger(number) || !number || number < 1) {
-      this.validationError = 'Enter a valid repository and pull request number.';
+    const pathParts = prUrl.pathname.split('/').filter(Boolean);
+    const [owner, repo, pullSegment, numberSegment] = pathParts;
+    const number = Number(numberSegment);
+    if (
+      !['github.com', 'www.github.com'].includes(prUrl.hostname) ||
+      !owner ||
+      !repo ||
+      pullSegment !== 'pull' ||
+      !Number.isInteger(number) ||
+      number < 1
+    ) {
+      this.validationError = 'Enter a valid GitHub pull request URL.';
       return;
     }
 

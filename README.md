@@ -9,7 +9,7 @@ A runnable demo of a multi-agent code review platform: **Python + FastAPI backen
 - **Specialist agents:** Security, Architecture, Standards, and Code Quality agents run independently against added diff lines.
 - **Optional AI context agent:** when `OPENAI_API_KEY` is configured, an LLM reviews the diff using retrieved project guidance and contributes additional findings.
 - **Knowledge base:** upload architecture notes, coding conventions, ESLint/Sonar rules, design-system docs, approved component notes, and prior review feedback. Files can also be placed in `backend/knowledge/`.
-- **GitHub PR integration:** fetch a PR diff using a GitHub token; optionally publish a summary comment. A webhook endpoint supports `opened`, `synchronize`, and `reopened` events.
+- **GitHub PR integration:** fetch a PR diff using a GitHub token; optionally publish the review findings with an additional comment from the review results. A webhook endpoint supports `opened`, `synchronize`, and `reopened` events.
 - **Dashboard:** metrics, review findings, recent review history, and knowledge source management.
 - **SQLite:** reviews and ingested knowledge persist locally.
 
@@ -93,7 +93,7 @@ Restart the backend after changing `.env`.
 
 ### Analyze a GitHub PR
 
-Enter `owner/repository` and PR number in the dashboard. The backend fetches the PR diff from GitHub. Enable **Post summary comment** to publish a comment. For that option, the token must have permission to write issue comments.
+Enter `owner/repository` and PR number in the dashboard. The backend fetches the PR diff from GitHub. You can enable **Post summary comment** during analysis, or post the saved findings from the results panel with an optional additional comment. For either option, the token must have permission to write issue comments.
 
 Equivalent API call:
 
@@ -134,6 +134,7 @@ Knowledge content is retrieved by matching terms from the diff. The optional LLM
 | POST | `/api/reviews/analyze` | Analyze a supplied unified diff |
 | GET | `/api/reviews` | List saved reviews |
 | GET | `/api/reviews/{id}` | Review details |
+| POST | `/api/reviews/{id}/post-comment` | Post saved PR findings with optional `additional_comment` |
 | GET | `/api/knowledge` | List knowledge sources |
 | POST | `/api/knowledge/upload` | Upload a knowledge file |
 | POST | `/api/github/pull-requests/{owner}/{repo}/{number}/analyze` | Fetch and analyze GitHub PR |

@@ -23,9 +23,10 @@ async def fetch_pull_request_diff(owner: str, repo: str, number: int):
 
 async def post_pr_comment(owner: str, repo: str, number: int, body: str):
     if not settings.github_token:
-        return
+        raise ValueError("Set GITHUB_TOKEN to post a comment on a GitHub pull request.")
     url = f"https://api.github.com/repos/{owner}/{repo}/issues/{number}/comments"
     async with httpx.AsyncClient(timeout=30) as client:
         response = await client.post(url, headers={"Authorization": f"Bearer {settings.github_token}",
             "Accept": "application/vnd.github+json"}, json={"body": body})
         response.raise_for_status()
+        return response.json()

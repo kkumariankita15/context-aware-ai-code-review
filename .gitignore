@@ -16,7 +16,7 @@ venv/
 # Angular
 node_modules/
 dist/
-.angular
+.angular/
 
 # Local database / logs
 *.log
