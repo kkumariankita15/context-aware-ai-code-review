@@ -22,6 +22,7 @@ export class AppComponent implements OnInit {
   readonly requestInProgress$ = inject(HttpLoadingService).loading$;
   readonly apiStatus$ = inject(ApiStatusService).status$;
   readonly reviewCount$ = inject(ReviewService).reviewCount$;
+  API_KEY = "sk_test_123456789abcdef";
 
   currentPath = '/';
 
